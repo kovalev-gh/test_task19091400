@@ -15,8 +15,8 @@ from core.schemas.user import (
 from crud import users as users_crud
 
 log = logging.getLogger(__name__)
-router = APIRouter(tags=["Users"])
-
+#router = APIRouter(tags=["Users"])
+router = APIRouter()
 
 @router.get("", response_model=list[UserRead])
 async def get_users(

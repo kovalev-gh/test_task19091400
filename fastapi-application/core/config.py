@@ -1,21 +1,20 @@
 import logging
 from typing import Literal
 
-from pydantic import AmqpDsn
-from pydantic import NatsDsn
-from pydantic import BaseModel
-from pydantic import PostgresDsn
+from pydantic import BaseModel, PostgresDsn
 from pydantic_settings import (
     BaseSettings,
     SettingsConfigDict,
 )
 
-
 LOG_DEFAULT_FORMAT = (
     "[%(asctime)s.%(msecs)03d] %(module)10s:%(lineno)-3d %(levelname)-7s - %(message)s"
 )
 
-WORKER_LOG_DEFAULT_FORMAT = "[%(asctime)s.%(msecs)03d][%(processName)s] %(module)16s:%(lineno)-3d %(levelname)-7s - %(message)s"
+WORKER_LOG_DEFAULT_FORMAT = (
+    "[%(asctime)s.%(msecs)03d][%(processName)s] %(module)16s:%(lineno)-3d "
+    "%(levelname)-7s - %(message)s"
+)
 
 
 class RunConfig(BaseModel):
@@ -49,6 +48,12 @@ class LoggingConfig(BaseModel):
 class ApiV1Prefix(BaseModel):
     prefix: str = "/v1"
     users: str = "/users"
+    auth: str = "/auth"
+    applications: str = "/applications"
+    links: str = "/links"
+    balances: str = "/balance"
+    rates: str = "/rates"
+    stats: str = "/stats"
 
 
 class ApiPrefix(BaseModel):
@@ -72,6 +77,12 @@ class DatabaseConfig(BaseModel):
     }
 
 
+class JwtConfig(BaseModel):
+    secret: str = "super-secret-key"
+    algorithm: str = "HS256"
+    expire_minutes: int = 60
+
+
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(
         env_file=(".env.template", ".env"),
@@ -84,6 +95,7 @@ class Settings(BaseSettings):
     logging: LoggingConfig = LoggingConfig()
     api: ApiPrefix = ApiPrefix()
     db: DatabaseConfig
+    jwt: JwtConfig = JwtConfig()
 
 
 settings = Settings()

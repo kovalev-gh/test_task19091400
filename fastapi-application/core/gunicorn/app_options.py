@@ -1,20 +1,23 @@
-from .logger import GunicornLogger
+from core.gunicorn.logger import GunicornLogger
 
+# Адрес и порт, которые будет слушать Gunicorn
+bind = "0.0.0.0:8000"
 
-def get_app_options(
-    host: str,
-    port: int,
-    timeout: int,
-    workers: int,
-    log_level: str,
-) -> dict:
-    return {
-        "accesslog": "-",
-        "errorlog": "-",
-        "bind": f"{host}:{port}",
-        "loglevel": log_level,
-        "logger_class": GunicornLogger,
-        "timeout": timeout,
-        "workers": workers,
-        "worker_class": "uvicorn.workers.UvicornWorker",
-    }
+# Количество воркеров (обычно = число CPU * 2)
+workers = 4
+
+# Таймаут соединения (в секундах)
+timeout = 120
+
+# Уровень логирования
+loglevel = "info"
+
+# Класс логгера
+logger_class = GunicornLogger
+
+# Класс воркеров (Uvicorn для FastAPI/ASGI)
+worker_class = "uvicorn.workers.UvicornWorker"
+
+# Логи в stdout/stderr (удобно для Docker)
+accesslog = "-"
+errorlog = "-"

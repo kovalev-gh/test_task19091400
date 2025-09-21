@@ -1,7 +1,7 @@
 from fastapi import APIRouter
 from core.config import settings
 
-from api.api_v1 import (
+from api.v1 import (
     auth,
     applications,
     links,

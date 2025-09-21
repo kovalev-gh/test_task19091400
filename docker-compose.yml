@@ -1,7 +1,9 @@
+version: "3.9"
+
 services:
 
   pg:
-    image: postgres
+    image: postgres:17
     environment:
       POSTGRES_DB: test_task19091400db
       POSTGRES_USER: user
@@ -12,7 +14,7 @@ services:
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:
-      test: [ "CMD-SHELL", "pg_isready" ]
+      test: ["CMD-SHELL", "pg_isready -U user -d test_task19091400db"]
       interval: 5s
       timeout: 3s
       retries: 3
@@ -25,6 +27,23 @@ services:
       PGADMIN_CONFIG_SERVER_MODE: 'False'
     ports:
       - "5051:80"
+
+  app:
+    build: .
+    container_name: fastapi_app
+    restart: always
+    env_file: ./fastapi-application/.env
+    depends_on:
+      pg:
+        condition: service_healthy
+    volumes:
+      - .:/app
+    ports:
+      - "8000:8000"
+    working_dir: /app/fastapi-application
+    command: >
+      sh -c "alembic upgrade head &&
+             gunicorn main:main_app -k uvicorn.workers.UvicornWorker -c core/gunicorn/app_options.py"
 
 volumes:
   pgdata:

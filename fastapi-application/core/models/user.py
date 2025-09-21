@@ -19,9 +19,7 @@ class User(IntIdPkMixin, CreatedAtMixin, Base):
     hashed_password: Mapped[str]
     username: Mapped[str] = mapped_column(String(64), unique=True, index=True)
     role: Mapped[UserRole] = mapped_column(Enum(UserRole), default=UserRole.merchant)
+    email: Mapped[str] = mapped_column(String(128), unique=True, index=True)
 
     balance_usdt: Mapped[Decimal] = mapped_column(Numeric(18, 6), default=0)
 
-    @property
-    def email(self) -> str:
-        return f"{self.username}@domain.com"

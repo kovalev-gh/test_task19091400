@@ -1,13 +1,16 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import select
 
 from core.schemas.applications import ApplicationCreate, ApplicationRead
 from core.auth import get_current_user
 from core.models.db_helper import db_helper
+from core.models import Application
 from crud import applications as crud_app
+from crud.links import assign_trader
 
-#router = APIRouter(prefix="/api/v1/applications", tags=["Applications"])
 router = APIRouter()
+
 
 @router.post("", response_model=ApplicationRead)
 async def create_application(
@@ -46,3 +49,30 @@ async def cancel_application(
 ):
     """Отменить заявку (если не approved)"""
     return await crud_app.cancel_application(db, user["user_id"], app_id)
+
+
+@router.post("/{app_id}/assign-trader", response_model=ApplicationRead)
+async def reassign_trader(
+    app_id: int,
+    db: AsyncSession = Depends(db_helper.session_getter),
+    user: dict = Depends(get_current_user),
+):
+    """Повторно назначить трейдера для заявки"""
+    res = await db.execute(
+        select(Application).where(
+            Application.id == app_id,
+            Application.user_id == user["user_id"],
+        )
+    )
+    app = res.scalar_one_or_none()
+    if not app:
+        raise HTTPException(404, "Application not found")
+
+    trader_id = await assign_trader(db, app.merchant_id, app)
+    if trader_id is None:
+        raise HTTPException(400, "No suitable trader found")
+
+    app.trader_id = trader_id
+    await db.commit()
+    await db.refresh(app)
+    return app

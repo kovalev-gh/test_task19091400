@@ -17,6 +17,8 @@ class LinkCreate(LinkBase):
 
 
 class LinkUpdate(BaseModel):
+    merchant_id: int | None = None
+    trader_id: int | None = None
     status: Literal["active", "disabled"] | None = None
     priority: int | None = None
     weight: int | None = None

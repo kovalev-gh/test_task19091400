@@ -16,12 +16,7 @@ async def login(
     data: LoginIn,
     db: AsyncSession = Depends(db_helper.session_getter),
 ):
-    """
-    Реальный логин:
-    - ищем пользователя по email (username = часть до @).
-    - сверяем введённый пароль с хешем в БД.
-    - при успехе выдаём JWT.
-    """
+
     username = data.email.split("@")[0]
 
     result = await db.execute(select(User).where(User.username == username))
@@ -38,11 +33,7 @@ async def register(
     data: LoginIn,  # используем LoginIn (email + password)
     db: AsyncSession = Depends(db_helper.session_getter),
 ):
-    """
-    Регистрация нового пользователя:
-    - username = часть email до "@"
-    - пароль хешируется и сохраняется
-    """
+
     username = data.email.split("@")[0]
 
     result = await db.execute(select(User).where(User.username == username))
@@ -64,9 +55,7 @@ async def me(
     claims=Depends(get_current_user),
     db: AsyncSession = Depends(db_helper.session_getter),
 ):
-    """
-    Возвращает профиль текущего пользователя.
-    """
+
     result = await db.execute(select(User).where(User.id == claims["user_id"]))
     user = result.scalar_one_or_none()
     if not user:

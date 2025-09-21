@@ -6,6 +6,7 @@ from typing import List
 
 from core.models import Application, ApplicationStatus, User, BalanceTransaction
 from core.schemas.applications import ApplicationCreate
+from crud.links import assign_trader
 
 Q6 = Decimal("0.000001")
 COMMISSION_PCT = Decimal("1.5")
@@ -44,6 +45,11 @@ async def create_application(
         status=ApplicationStatus.created,
     )
     db.add(app)
+    await db.flush()  # чтобы у app появился id
+
+    trader_id = await assign_trader(db, app.merchant_id, app)
+    app.trader_id = trader_id
+
     await db.commit()
     await db.refresh(app)
     return app

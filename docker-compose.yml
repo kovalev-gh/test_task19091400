@@ -38,12 +38,23 @@ services:
         condition: service_healthy
     volumes:
       - .:/app
-    ports:
-      - "8000:8000"
+    expose:
+      - "8000"
     working_dir: /app/fastapi-application
     command: >
       sh -c "alembic upgrade head &&
              gunicorn main:main_app -k uvicorn.workers.UvicornWorker -c core/gunicorn/app_options.py"
+
+  nginx:
+    image: nginx:latest
+    container_name: nginx_app
+    restart: always
+    depends_on:
+      - app
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
 
 volumes:
   pgdata:

@@ -9,9 +9,10 @@ async def test_create_application(client):
     print("CREATE RESPONSE:", resp.text)
     assert resp.status_code == 200, resp.text
     data = resp.json()
-    # amount_original может быть строкой -> приводим к float
     assert float(data["amount_original"]) == 100
     assert data["currency"] == "USD"
+    assert "id" in data
+    assert "user_id" in data
 
 
 @pytest.mark.asyncio
@@ -26,8 +27,8 @@ async def test_confirm_application(client):
     data = resp2.json()
     assert data["status"] == "approved"
     assert data["commission_usdt"] is not None
-    # проверим что сумма в usdt положительная
     assert float(data["amount_usdt"]) > 0
+    assert "user_id" in data
 
 
 @pytest.mark.asyncio
@@ -41,3 +42,4 @@ async def test_cancel_application(client):
     assert resp2.status_code == 200, resp2.text
     data = resp2.json()
     assert data["status"] == "cancelled"
+    assert "user_id" in data

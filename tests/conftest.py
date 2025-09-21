@@ -41,9 +41,15 @@ async def prepare_database():
     async with engine_test.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
 
-    # создаём тестового пользователя (id=1)
     async with AsyncSessionLocal() as session:
-        user = User(id=1, username="testuser", hashed_password="fake")
+        user = User(
+            id=1,
+            username="testuser",
+            email="testuser@domain.com",
+            hashed_password="fake",
+            role="merchant",
+            balance_usdt=0,
+        )
         session.add(user)
         await session.commit()
 
@@ -66,12 +72,11 @@ async def client():
 
     # мок get_current_user
     async def override_get_current_user():
-        return {"user_id": 1, "email": "test@example.com"}
+        return {"user_id": 1, "email": "testuser@domain.com"}
 
     from core.auth import get_current_user
     app.dependency_overrides[get_current_user] = override_get_current_user
 
-    # ✅ мок db_helper: исключаем local_kw
     async def override_session_getter():
         async with AsyncSessionLocal() as session:
             yield session

@@ -44,3 +44,4 @@ async def test_assign_trader_to_application(client):
     data = resp2.json()
     assert int(data["id"]) == app_id
     assert data["trader_id"] is not None
+    assert "email" in data or data["trader_id"] == 1
